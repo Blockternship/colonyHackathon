@@ -4,6 +4,7 @@ const validate = require('webpack-validator');
 
 const parts = require('./libs/parts');
 
+
 const TARGET = process.env.npm_lifecycle_event;
 const ENABLE_POLLING = process.env.ENABLE_POLLING;
 const PATHS = {
@@ -35,7 +36,7 @@ const common = merge(
       //publicPath: ''
     },
     resolve: {
-      extensions: ['', '.js', '.jsx']
+      extensions: ['', '.js', '.jsx', '.json']
     }
   },
   parts.indexTemplate({
@@ -43,7 +44,8 @@ const common = merge(
     appMountId: 'app'
   }),
   parts.loadJSX(PATHS.app),
-  parts.lintJSX(PATHS.app)
+  parts.lintJSX(PATHS.app),
+
 );
 
 var config;
@@ -90,6 +92,8 @@ switch(TARGET) {
     );
     break;
   default:
+    console.log('DEFAULT');
+
     config = merge(
       common,
       {
@@ -106,7 +110,15 @@ switch(TARGET) {
         poll: ENABLE_POLLING
       }),
       parts.enableReactPerformanceTools(),
-      parts.npmInstall()
+      parts.npmInstall(),
+      {module: {
+        loaders: [
+          {
+            test: /\.json$/,
+            loader: 'json-loader'
+          }
+        ]
+      }},
     );
 }
 

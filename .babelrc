@@ -10,5 +10,10 @@
         "react-hmre"
       ]
     }
-  }
+  },
+  "plugins": [
+    "transform-runtime",
+    "syntax-async-functions",
+    "transform-regenerator"
+  ]
 }
