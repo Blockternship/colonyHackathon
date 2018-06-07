@@ -17,6 +17,7 @@
     "no-unused-vars": 0,
     "react/display-name": 0,
     "react/prop-types": 0,
-    "react/no-multi-comp": 0
+    "react/no-multi-comp": 0,
+    "comma-dangle": "off",
   }
 }
