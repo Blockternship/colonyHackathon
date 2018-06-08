@@ -1,14 +1,17 @@
 import LaneActions from '../actions/LaneActions';
 
+const col = require('../libs/johnsColony');
+
 export default class LaneStore {
+
   constructor() {
     this.bindActions(LaneActions);
-
     this.lanes = [];
   }
   create(lane) {
     // If `notes` aren't provided for some reason,
     // default to an empty array.
+    console.log('create()')
     lane.notes = lane.notes || [];
 
     this.setState({
@@ -55,6 +58,12 @@ export default class LaneStore {
 
         return lane;
       })
+    });
+  }
+  load(Colonies){
+    console.log('load()')
+    this.setState({
+      lanes: Colonies
     });
   }
 }
