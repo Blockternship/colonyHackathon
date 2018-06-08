@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom';
 import App from './components/App';
 import Provider from './components/Provider';
 
-
 // Import the prerequisites
 const { providers, Wallet } = require('ethers');
 const { default: EthersAdapter } = require('@colony/colony-js-adapter-ethers');
@@ -65,6 +64,7 @@ const example = async () => {
 };
 
 example();
+
 
 ReactDOM.render(
   <Provider><App /></Provider>,
