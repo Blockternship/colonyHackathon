@@ -1,28 +1,16 @@
 import React from 'react';
 import uuid from 'uuid';
 import Notes from './Notes';
+import connect from '../libs/connect';
+import NoteActions from '../actions/NoteActions';
+
 
 const { TrufflepigLoader } = require('@colony/colony-js-contract-loader-http');
 const loader = new TrufflepigLoader();
 
 
-export default class App extends React.Component {
-  constructor(props) {
-    super(props);
+class App extends React.Component {
 
-    this.state = {
-      notes: [
-        {
-          id: uuid.v4(),
-          task: 'Learn React'
-        },
-        {
-          id: uuid.v4(),
-          task: 'Do laundry'
-        }
-      ]
-    };
-  }
   async createColony(){
     console.log('createColony()')
     const { privateKey } = await loader.getAccount(0);
@@ -51,7 +39,7 @@ export default class App extends React.Component {
   }
 
   render() {
-    const {notes} = this.state;
+    const {notes} = this.props;
 
     return (
       <div>
@@ -67,47 +55,29 @@ export default class App extends React.Component {
   }
 
   addNote = () => {
-    this.getData();
-    console.log('End of test.')
-    /*
-    this.setState({
-      notes: this.state.notes.concat([{
-        id: uuid.v4(),
-        task: 'OK'
-      }])
+    //this.getData();
+    this.props.NoteActions.create({
+      id: uuid.v4(),
+      task: 'New task'
     });
-    */
   }
 
   deleteNote = (id, e) => {
     // Avoid bubbling to edit
     e.stopPropagation();
-
-    this.setState({
-      notes: this.state.notes.filter(note => note.id !== id)
-    });
+    this.props.NoteActions.delete(id);
   }
   activateNoteEdit = (id) => {
-    this.setState({
-      notes: this.state.notes.map(note => {
-        if(note.id === id) {
-          note.editing = true;
-        }
-
-        return note;
-      })
-    });
+    this.props.NoteActions.update({id, editing: true});
   }
   editNote = (id, task) => {
-    this.setState({
-      notes: this.state.notes.map(note => {
-        if(note.id === id) {
-          note.editing = false;
-          note.task = task;
-        }
-
-        return note;
-      })
-    });
+    this.props.NoteActions.update({id, task, editing: false});
   }
 }
+
+
+export default connect(({notes}) => ({
+  notes
+}), {
+  NoteActions
+})(App)

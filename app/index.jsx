@@ -1,6 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './components/App';
+import Provider from './components/Provider';
+
 
 // Import the prerequisites
 const { providers, Wallet } = require('ethers');
@@ -15,10 +17,6 @@ const loader = new TrufflepigLoader();
 
 // Create a provider for local TestRPC (Ganache)
 const provider = new providers.JsonRpcProvider('http://localhost:8545/');
-
-if(process.env.NODE_ENV !== 'production') {
-  React.Perf = require('react-addons-perf');
-}
 
 
 // The following methods use Promises
@@ -69,7 +67,7 @@ const example = async () => {
 example();
 
 ReactDOM.render(
-  <App />,
+  <Provider><App /></Provider>,
 
   document.getElementById('app')
 );
