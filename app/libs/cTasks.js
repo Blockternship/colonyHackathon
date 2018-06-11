@@ -12,11 +12,11 @@ const loader = new TrufflepigLoader();
 // Create a provider for local TestRPC (Ganache)
 const provider = new providers.JsonRpcProvider('http://localhost:8545/');
 
-exports.createTask = async () => {
+exports.createTask = async (Title, Description, Subdomain) => {
   // Initialise the Extended Colony Protocol
 
   await ecp.init();
-  console.log('ecp done');
+  console.log('ecp initialised');
     // Get the private key from the first account from the ganache-accounts
   // through trufflepig
   const { privateKey } = await loader.getAccount(0);
@@ -39,7 +39,11 @@ exports.createTask = async () => {
   const colonyClient = await networkClient.getColonyClient(1);
 
   // Create a task!
-  const specificationHash = await ecp.saveTaskSpecification({ title: 'Cool task', description: 'Create this cool thing.' });
+  const specificationHash = await ecp.saveTaskSpecification({
+    title: Title,
+    description: Description,
+    subdomain: Subdomain
+   });
 
   // Unique, immutable hash on IPFS
   console.log('Specification hash', specificationHash);
@@ -48,13 +52,14 @@ exports.createTask = async () => {
   const { eventData: { taskId }} = await colonyClient.createTask.send({ specificationHash, domainId: 1 });
 
   // Let's take a look at the newly created task
-  const task = await colonyClient.getTask.call({ taskId })
-  console.log(task);
+  // const task = await colonyClient.getTask.call({ taskId })
+  // console.log(task);
 
-  const taskInfo = await ecp.getTaskSpecification(task.specificationHash);
-  console.log(taskInfo);
+  // const taskInfo = await ecp.getTaskSpecification(task.specificationHash);
+  // console.log(taskInfo);
 
   // Do some cleanup
+  console.log('Task added.')
   await ecp.stop();
 }
 
@@ -83,12 +88,13 @@ exports.getTasks = async () => {
   await ecp.init();
   console.log('ecp done');
 
-  var i = 0;
+  var i = 1;
   var tasks = [];
-  while(i < count.count){
+  while(i < count.count + 1){
     var taskHash = await colonyClient.getTask.call({ taskId:i });
     console.log('Task: ' + i)
     console.log('Hash: ' + taskHash.specificationHash)
+    console.log('domainId: ' + taskHash.domainId)
     if(taskHash.specificationHash == null){
       console.log('Weird science...')
       i++;
@@ -97,7 +103,7 @@ exports.getTasks = async () => {
 
     var taskInfo = await ecp.getTaskSpecification(taskHash.specificationHash);
     console.log(taskInfo);
-    tasks.push({id: i, title: taskInfo.title, description: taskInfo.description})
+    tasks.push({id: i, title: taskInfo.title, description: taskInfo.description, subdomain: taskInfo.subdomain })
     i++;
   }
 

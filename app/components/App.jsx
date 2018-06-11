@@ -29,18 +29,24 @@ const App = ({LaneActions, lanes}) => {
   const load = async () => {
 
     console.log('load')
-    const colonies = await col.getColonies();
-    LaneActions.load(colonies);
+    const defaultColony = await col.startColony();         // Make sure default colony is loaded
+
+    const subDomains = [
+      {id: 1, name: 'WLC', address: uuid.v4(), notes: []},
+      {id: 2, name: 'Intelsat', address: uuid.v4(), notes: []},
+    ]
+
+    LaneActions.load(subDomains);
 
     const tasks = await cTasks.getTasks();
-    console.log('TASKS: ')
+    console.log('LOADING TASKS TO LOCAL: ')
     console.log(tasks)
     var i = 0;
     while(i < tasks.length){
       console.log(tasks[i])
       console.log('ID: ' + tasks[i].id)
       LaneActions.attachToLane({
-        laneId: 1,
+        laneId: tasks[i].subdomain,
         noteId: tasks[i].id
       });
       i++;
@@ -57,11 +63,17 @@ const App = ({LaneActions, lanes}) => {
 
   };
 
+  const createCompany = async () => {
+    console.log('createCompany()')
+    // This needs to create a subdomain for a company with name, etc
+  }
+
   return (
     <Jumbotron>
-      <h1>This Is A Test</h1>
+      <h1>Get It Done!</h1>
       <div>
         <Button onClick={load} bsStyle="primary">LOAD</Button>
+        <Button bsStyle="primary" onClick={createCompany}>ADD COMPANY</Button>
         <button className="add-lane" onClick={createTask}>CREATE TASK</button>
         <Lanes lanes={lanes} />
       </div>
