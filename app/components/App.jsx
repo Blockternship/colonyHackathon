@@ -3,9 +3,11 @@ import uuid from 'uuid';
 import connect from '../libs/connect';
 import Lanes from './Lanes';
 import LaneActions from '../actions/LaneActions';
+import NoteActions from '../actions/NoteActions';
 import {Bootstrap, Jumbotron, Button, Grid, Row, Col} from 'react-bootstrap';
 
 const col = require('../libs/johnsColony');
+const cTasks = require('../libs/cTasks');
 
 const App = ({LaneActions, lanes}) => {
 
@@ -30,6 +32,29 @@ const App = ({LaneActions, lanes}) => {
     const colonies = await col.getColonies();
     LaneActions.load(colonies);
 
+    const tasks = await cTasks.getTasks();
+    console.log('TASKS: ')
+    console.log(tasks)
+    var i = 0;
+    while(i < tasks.length){
+      console.log(tasks[i])
+      console.log('ID: ' + tasks[i].id)
+      LaneActions.attachToLane({
+        laneId: 1,
+        noteId: tasks[i].id
+      });
+      i++;
+    }
+
+    NoteActions.load(tasks);
+  };
+
+  const createTask = async () => {
+
+    console.log('createTask()')
+    await col.createTask();
+    console.log('createTask() done');
+
   };
 
   return (
@@ -37,7 +62,7 @@ const App = ({LaneActions, lanes}) => {
       <h1>This Is A Test</h1>
       <div>
         <Button onClick={load} bsStyle="primary">LOAD</Button>
-        <button className="add-lane" onClick={addLane}>+</button>
+        <button className="add-lane" onClick={createTask}>CREATE TASK</button>
         <Lanes lanes={lanes} />
       </div>
     </Jumbotron>

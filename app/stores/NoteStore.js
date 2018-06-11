@@ -32,4 +32,10 @@ export default class NoteStore {
       notes: this.notes.filter(note => note.id !== id)
     });
   }
+  load(Notes){
+    console.log('Notes load()')
+    this.setState({
+      notes: Notes
+    });
+  }
 }
