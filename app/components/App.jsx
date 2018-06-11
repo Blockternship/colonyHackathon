@@ -3,6 +3,7 @@ import uuid from 'uuid';
 import connect from '../libs/connect';
 import Lanes from './Lanes';
 import LaneActions from '../actions/LaneActions';
+import {Bootstrap, Jumbotron, Button, Grid, Row, Col} from 'react-bootstrap';
 
 const col = require('../libs/johnsColony');
 
@@ -32,11 +33,14 @@ const App = ({LaneActions, lanes}) => {
   };
 
   return (
-    <div>
-      <button onClick={load}>LOAD</button>
-      <button className="add-lane" onClick={addLane}>+</button>
-      <Lanes lanes={lanes} />
-    </div>
+    <Jumbotron>
+      <h1>This Is A Test</h1>
+      <div>
+        <Button onClick={load} bsStyle="primary">LOAD</Button>
+        <button className="add-lane" onClick={addLane}>+</button>
+        <Lanes lanes={lanes} />
+      </div>
+    </Jumbotron>
   );
 };
 

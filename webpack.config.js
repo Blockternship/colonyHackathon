@@ -99,10 +99,11 @@ switch(TARGET) {
       {
         devtool: 'eval-source-map',
         entry: {
-          style: PATHS.style
+          style: 'bootstrap/dist/css/bootstrap.css'
         }
+
       },
-      parts.setupCSS(PATHS.style),
+      parts.setupCSS('bootstrap/dist/css/bootstrap.css'),
       parts.devServer({
         // Customize host/port here if needed
         host: process.env.HOST,
@@ -112,11 +113,16 @@ switch(TARGET) {
       parts.enableReactPerformanceTools(),
       parts.npmInstall(),
       {module: {
+
         loaders: [
           {
             test: /\.json$/,
             loader: 'json-loader'
-          }
+          },
+          {
+          test: /\.css$/,
+           loader: 'style-loader!css-loader'
+         }
         ]
       }},
     );
