@@ -3,7 +3,7 @@ const CleanWebpackPlugin = require('clean-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const NpmInstallPlugin = require('npm-install-webpack-plugin');
-
+/*
 exports.indexTemplate = function(options) {
   return {
     plugins: [
@@ -12,6 +12,18 @@ exports.indexTemplate = function(options) {
         title: options.title,
         appMountId: options.appMountId,
         inject: false
+      })
+    ]
+  };
+}
+*/
+exports.indexTemplate = function(options) {
+  return {
+    plugins: [
+      new HtmlWebpackPlugin({
+        title: options.title,
+        template: options.template,
+        appMountId: options.appMountId,
       })
     ]
   };

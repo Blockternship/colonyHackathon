@@ -1,11 +1,16 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './components/App';
-import Provider from './components/Provider';
 import 'bootstrap/dist/css/bootstrap.css';
+import TaskModal from './components/TaskModal';
+
+
+if(process.env.NODE_ENV !== 'production') {
+  console.log('JOHNS?')
+  //React.Perf = require('react-addons-perf');
+}
 
 ReactDOM.render(
-  <Provider><App /></Provider>,
-
+  <App />,
   document.getElementById('app')
 );

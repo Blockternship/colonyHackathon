@@ -1,88 +1,88 @@
 import React from 'react';
 import uuid from 'uuid';
-import connect from '../libs/connect';
-import Lanes from './Lanes';
-import LaneActions from '../actions/LaneActions';
-import NoteActions from '../actions/NoteActions';
-import {Bootstrap, Jumbotron, Button, Grid, Row, Col} from 'react-bootstrap';
+import Tasks from './Tasks';
+import AddTask from './AddTask';
+import {Bootstrap, Jumbotron, Button, Grid, Row, Col, Modal, OverlayTrigger, Popover, Tooltip } from 'react-bootstrap';
 
 const col = require('../libs/johnsColony');
 const cTasks = require('../libs/cTasks');
 
-const App = ({LaneActions, lanes}) => {
+export default class App extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      tasks: [{id: 1, title: 'Loading Tasks...', description: '', subdomain: 1 }],
+      subdomains: [
+        {id: 1, name: 'WLC', address: uuid.v4(), tasks: []},
+        {id: 2, name: 'Intelsat', address: uuid.v4(), tasks: []},
+      ]
+    };
 
-  const addLane = async () => {
-
-    console.log('Should prompt for name, description, etc.')
-    console.log('addColony()')
-    const colonyAddress = await col.example();
-    console.log('PRIVATE TEST:');
-    console.log(colonyAddress);
-
-    LaneActions.create({
-      id: uuid.v4(),
-      name: colonyAddress
+    const loadedTasks = this.test();
+    console.log('After test');
+  }
+  async test(){
+    console.log('test');
+    const tasks = await cTasks.getTasks();
+    this.setState({
+      tasks: tasks
     });
-    console.log('Is it ok?')
-  };
+    return tasks;
+  }
+  async loadInit(){
 
-  const load = async () => {
-
-    console.log('load')
+    console.log('loadInit()')
     const defaultColony = await col.startColony();         // Make sure default colony is loaded
-
-    const subDomains = [
-      {id: 1, name: 'WLC', address: uuid.v4(), notes: []},
-      {id: 2, name: 'Intelsat', address: uuid.v4(), notes: []},
-    ]
-
-    LaneActions.load(subDomains);
 
     const tasks = await cTasks.getTasks();
     console.log('LOADING TASKS TO LOCAL: ')
     console.log(tasks)
-    var i = 0;
-    while(i < tasks.length){
-      console.log(tasks[i])
-      console.log('ID: ' + tasks[i].id)
-      LaneActions.attachToLane({
-        laneId: tasks[i].subdomain,
-        noteId: tasks[i].id
-      });
-      i++;
-    }
+    this.setState({
+      tasks: tasks
+    });
+  }
+  load = () => {
+    console.log('load()')
+    this.loadInit();
+  }
+  async upDateColony(Task){
 
-    NoteActions.load(tasks);
-  };
+    console.log('upDateColony()')
+    console.log('Adding task: ' + Task)
+    this.setState({
+      tasks: this.state.tasks.concat([{
+        title: Task,
+        description: 'Test'
+      }])
+    });
 
-  const createTask = async () => {
-
-    console.log('createTask()')
-    await col.createTask();
-    console.log('createTask() done');
-
-  };
-
-  const createCompany = async () => {
-    console.log('createCompany()')
-    // This needs to create a subdomain for a company with name, etc
+    //const tasks = await cTasks.getTasks();
+    console.log(this.props.tasks);
   }
 
-  return (
-    <Jumbotron>
-      <h1>Get It Done!</h1>
-      <div>
-        <Button onClick={load} bsStyle="primary">LOAD</Button>
-        <Button bsStyle="primary" onClick={createCompany}>ADD COMPANY</Button>
-        <button className="add-lane" onClick={createTask}>CREATE TASK</button>
-        <Lanes lanes={lanes} />
-      </div>
-    </Jumbotron>
-  );
-};
+  addTask = (Task) => {
+    console.log('addTask(): ' + Task)
+    this.upDateColony(Task)
+    //this.loadInit(this.state.value);
+  }
+  render() {
+    const tasks = this.state.tasks;
 
-export default connect(({lanes}) => ({
-  lanes
-}), {
-  LaneActions
-})(App)
+    return (
+      <div>
+          <h1>Get It Done!</h1>
+          <div>
+            <Button onClick={() => this.load()} bsStyle="primary">LOAD</Button>
+            <Button bsStyle="primary" onClick={() => console.log('Needs done')}>ADD COMPANY</Button>
+            <button className="add-lane" onClick={() => console.log('Needs done')}>CREATE TASK</button>
+          </div>
+          <div>
+            <button onClick={() => console.log('add note')}>+</button>
+            <Tasks tasks={tasks} />
+          </div>
+          <AddTask tasks={tasks} addTask={task => this.addTask(task)}/>
+      </div>
+
+    );
+  }
+}

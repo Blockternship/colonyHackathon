@@ -41,7 +41,8 @@ const common = merge(
   },
   parts.indexTemplate({
     title: 'Kanban demo',
-    appMountId: 'app'
+    appMountId: 'app',
+    template: PATHS.app + '/index.html',
   }),
   parts.loadJSX(PATHS.app),
   parts.lintJSX(PATHS.app),
