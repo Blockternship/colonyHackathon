@@ -56,7 +56,9 @@ export default class App extends React.Component {
       date: date,
       location: Task.location,
       comment: Task.comment,
-      subdomain: 1
+      subdomain: 1,
+      isRepaired: false,
+      isConfirmed: false,
     };
 
     const holeInfo = await cTasks.recordHole(holeDetails);

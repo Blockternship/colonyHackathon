@@ -1,8 +1,19 @@
 import React from 'react';
+import {Button } from 'react-bootstrap';
 
-export default ({tasks}) => (
+export default class Tasks extends React.Component {
 
-  <ul>{tasks.map(task =>
-    <li key={task.id}>{task.date}: {task.location} - {task.comment}</li>
-  )}</ul>
-);
+    confirmRepaired(Test){
+      console.log('confirmRapired()');
+      console.log(Test)
+    }
+
+    render() {
+      const tasks = this.props.tasks;
+      return (
+          <ul>{tasks.map(task =>
+            <div><li key={task.id}>{task.date}: {task.location} - {task.comment}</li><Button bsStyle="primary" onClick={() => this.confirmRepaired(task.id)}>CONFIRM REPAIRED</Button></div>
+          )}</ul>
+      );
+    }
+}
