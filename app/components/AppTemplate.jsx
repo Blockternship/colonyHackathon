@@ -11,16 +11,18 @@ export default class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      tasks: [{id: 1, location: 'Loading Data From Colony...', comment: '', subdomain: 1, date: new Date().toLocaleString() }],
+      tasks: [{id: 1, title: 'Loading Tasks...', description: '', subdomain: 1 }],
       subdomains: [
         {id: 1, name: 'WLC', address: uuid.v4(), tasks: []},
         {id: 2, name: 'Intelsat', address: uuid.v4(), tasks: []},
       ]
     };
 
-    const loadedTasks = this.loadColonyTasks();
+    const loadedTasks = this.test();
+    console.log('After test');
   }
-  async loadColonyTasks(){
+  async test(){
+    console.log('test');
     const tasks = await cTasks.getTasks();
     this.setState({
       tasks: tasks
@@ -47,25 +49,15 @@ export default class App extends React.Component {
 
     console.log('upDateColony()')
     console.log('Adding task: ' + Task)
-
-    const id = uuid.v4();
-    const date = new Date().toLocaleString();
-
-    const holeDetails = {
-      id: id,
-      date: date,
-      location: Task.location,
-      comment: Task.comment,
-      subdomain: 1
-    };
-
-    const holeInfo = await cTasks.recordHole(holeDetails);
-
-    console.log('Updating local storage');
-
     this.setState({
-      tasks: this.state.tasks.concat([holeDetails])
+      tasks: this.state.tasks.concat([{
+        title: Task,
+        description: 'Test'
+      }])
     });
+
+    //const tasks = await cTasks.getTasks();
+    console.log(this.props.tasks);
   }
 
   addTask = (Task) => {
@@ -78,15 +70,19 @@ export default class App extends React.Component {
 
     return (
       <div>
-          <h1>Fill The Hole!</h1>
+          <h1>Get It Done!</h1>
           <div>
-            <AddTask tasks={tasks} addTask={task => this.addTask(task)}/>
+            <Button onClick={() => this.load()} bsStyle="primary">LOAD</Button>
+            <Button bsStyle="primary" onClick={() => console.log('Needs done')}>ADD COMPANY</Button>
+            <button className="add-lane" onClick={() => console.log('Needs done')}>CREATE TASK</button>
           </div>
           <div>
-            <h2>Holes Already Spotted</h2>
+            <button onClick={() => console.log('add note')}>+</button>
             <Tasks tasks={tasks} />
           </div>
+          <AddTask tasks={tasks} addTask={task => this.addTask(task)}/>
       </div>
+
     );
   }
 }

@@ -5,41 +5,45 @@ export default class AddTask extends React.Component {
   constructor(props, context) {
     super(props, context);
 
-    this.handleChange = this.handleChange.bind(this);
+    this.handleLocationChange = this.handleLocationChange.bind(this);
+    this.handleCommentChange = this.handleCommentChange.bind(this);
 
     this.state = {
-      value: ''
+      location: '',
+      comment: '',
     };
   }
-
-  getValidationState() {
-    const length = this.state.value.length;
-    console.log('change: ' + length)
-    if (length > 10) return 'success';
-    else if (length > 5) return 'warning';
-    else if (length > 0) return 'error';
-    return null;
+  handleLocationChange(e) {
+    this.setState({ location: e.target.value });
   }
-
-  handleChange(e) {
-    this.setState({ value: e.target.value });
+  handleCommentChange(e) {
+    this.setState({ comment: e.target.value });
   }
   render() {
     return (
       <form>
-        <FormGroup
-          controlId="formBasicText"
-          validationState={this.getValidationState()}
-        >
-          <ControlLabel>Working example with validation</ControlLabel>
-          <FormControl
-            type="text"
-            value={this.state.value}
-            placeholder="Enter text"
-            onChange={this.handleChange}
-          />
+        <FormGroup>
+          <ControlLabel>Spotted A Hole? Enter It Here</ControlLabel>
+          <FormGroup>
+            <ControlLabel>Location</ControlLabel>
+            <FormControl
+              type="text"
+              value={this.state.value}
+              placeholder="i.e. Main St, Kirknewton"
+              onChange={this.handleLocationChange}
+            />
+          </FormGroup>
+          <FormGroup>
+            <ControlLabel>Comment</ControlLabel>
+            <FormControl
+              type="text"
+              value={this.state.value}
+              placeholder="i.e. It's a really big hole that's wrecking my cars suspension!"
+              onChange={this.handleCommentChange}
+            />
+          </FormGroup>
           <FormControl.Feedback />
-          <Button bsStyle="primary" onClick={() => this.props.addTask(this.state.value)}>ADD TASK</Button>
+          <Button bsStyle="primary" onClick={() => this.props.addTask(this.state)}>RECORD</Button>
         </FormGroup>
       </form>
     );

@@ -6,7 +6,7 @@ import TaskModal from './components/TaskModal';
 
 
 if(process.env.NODE_ENV !== 'production') {
-  console.log('JOHNS?')
+  // console.log('JOHNS?')
   //React.Perf = require('react-addons-perf');
 }
 

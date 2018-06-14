@@ -12,12 +12,11 @@ const loader = new TrufflepigLoader();
 // Create a provider for local TestRPC (Ganache)
 const provider = new providers.JsonRpcProvider('http://localhost:8545/');
 
-exports.createTask = async (Title, Description, Subdomain) => {
-  // Initialise the Extended Colony Protocol
+exports.recordHole = async (HoleInfo) => {
 
   await ecp.init();
-  console.log('ecp initialised');
-    // Get the private key from the first account from the ganache-accounts
+  // console.log('ecp initialised');
+  // Get the private key from the first account from the ganache-accounts
   // through trufflepig
   const { privateKey } = await loader.getAccount(0);
 
@@ -39,14 +38,10 @@ exports.createTask = async (Title, Description, Subdomain) => {
   const colonyClient = await networkClient.getColonyClient(1);
 
   // Create a task!
-  const specificationHash = await ecp.saveTaskSpecification({
-    title: Title,
-    description: Description,
-    subdomain: Subdomain
-   });
+  const specificationHash = await ecp.saveTaskSpecification(HoleInfo);
 
   // Unique, immutable hash on IPFS
-  console.log('Specification hash', specificationHash);
+  // .log('Specification hash', specificationHash);
 
   // Create a task in the root domain
   const { eventData: { taskId }} = await colonyClient.createTask.send({ specificationHash, domainId: 1 });
@@ -59,7 +54,7 @@ exports.createTask = async (Title, Description, Subdomain) => {
   // console.log(taskInfo);
 
   // Do some cleanup
-  console.log('Task added.')
+  // console.log('Task added.')
   await ecp.stop();
 }
 
@@ -83,27 +78,31 @@ exports.getTasks = async () => {
 
   const count = await colonyClient.getTaskCount.call();
 
-  console.log('Number of tasks deployed: ' + count.count);
+  // console.log('Number of tasks deployed: ' + count.count);
+  var tasks = [];
+
+  if(count.count == 0){
+    tasks.push({id: 'noData', location: 'No Holes Spotted', comment: 'Go On Be The First!', subdomain: 0, date: new Date().toLocaleString() })
+  }
 
   await ecp.init();
-  console.log('ecp done');
+  // console.log('ecp done');
 
   var i = 1;
-  var tasks = [];
   while(i < count.count + 1){
     var taskHash = await colonyClient.getTask.call({ taskId:i });
-    console.log('Task: ' + i)
-    console.log('Hash: ' + taskHash.specificationHash)
-    console.log('domainId: ' + taskHash.domainId)
+    // console.log('Task: ' + i)
+    // console.log('Hash: ' + taskHash.specificationHash)
+    // console.log('domainId: ' + taskHash.domainId)
     if(taskHash.specificationHash == null){
-      console.log('Weird science...')
+      // console.log('Weird science...')
       i++;
       continue;
     }
 
     var taskInfo = await ecp.getTaskSpecification(taskHash.specificationHash);
-    console.log(taskInfo);
-    tasks.push({id: i, title: taskInfo.title, description: taskInfo.description, subdomain: taskInfo.subdomain })
+    // console.log(taskInfo);
+    tasks.push({id: i, location: taskInfo.location, comment: taskInfo.comment, subdomain: taskInfo.subdomain, date: taskInfo.date })
     i++;
   }
 
