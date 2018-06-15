@@ -19,7 +19,7 @@ const MyMapComponent = compose(
     onClick={props.onMapClick}
   >
     {props.existingHoles.map(hole =>
-      <Marker position={ {lat: hole.location.lat, lng: hole.location.lng}}>
+      <Marker key={hole.id} position={ {lat: hole.location.lat, lng: hole.location.lng}}>
       </Marker>
     )}
     <Marker position={props.markerPosition}>

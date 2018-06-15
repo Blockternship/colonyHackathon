@@ -15,49 +15,60 @@ const loader = new TrufflepigLoader();
 // Create a provider for local TestRPC (Ganache)
 const provider = new providers.JsonRpcProvider('http://localhost:8545/');
 
-exports.recordHole = async (HoleInfo) => {
+exports.getAddress = async (AddressNo) => {
+  const account = await loader.getAccount(AddressNo);
+  return account;
+}
+
+exports.recordHole = async (UserAddress, CompanyAddress, HoleInfo) => {
 
   await ecp.init();
-  // console.log('ecp initialised');
-  // Get the private key from the first account from the ganache-accounts
-  // through trufflepig
-  const { privateKey } = await loader.getAccount(0);
+  //const userAccount = await loader.getAccount(0);
+  //const privateKey = userAccount.privateKey;
+  /*
+  const privateKey = UserAddress.privateKey;
 
-  // Create a wallet with the private key (so we have a balance we can use)
-  const wallet = new Wallet(privateKey, provider);
+  const wallet = new Wallet(privateKey, provider);                              // Create a wallet with the private key (so we have a balance we can use)
 
-  // Create an adapter (powered by ethers)
-  const adapter = new EthersAdapter({
+  console.log(wallet)
+
+  const adapter = new EthersAdapter({                                           // Create an adapter (powered by ethers)
     loader,
     provider,
     wallet,
   });
 
-  // Connect to ColonyNetwork with the adapter!
-  const networkClient = new ColonyNetworkClient({ adapter });
+  console.log('1')
+  const networkClient = new ColonyNetworkClient({ adapter });                   // Connect to ColonyNetwork with the adapter!
   await networkClient.init();
+  console.log('2')
 
-  // For a colony that exists already, you just need its ID:
   const userColonyClient = await networkClient.getColonyClient(1);
+  */
+  const userColonyClient = await getNetworkClient(UserAddress);
+  const councilColonyClient = await getNetworkClient(CompanyAddress);
+  console.log('3')
 
-  // Create a task!
-  const specificationHash = await ecp.saveTaskSpecification(HoleInfo);
+  const specificationHash = await ecp.saveTaskSpecification(HoleInfo);          // Create a task!
 
-  // Unique, immutable hash on IPFS
-  // .log('Specification hash', specificationHash);
+  console.log('4')
+  const { eventData: { taskId }} = await userColonyClient.createTask.send({ specificationHash, domainId: 1 });  // Create a task in the root domain
+  console.log('5')
 
-  // Create a task in the root domain
-  const { eventData: { taskId }} = await userColonyClient.createTask.send({ specificationHash, domainId: 1 });
+  const councilAccount = await loader.getAccount(1);
+  await userColonyClient.setTaskRoleUser.send({ taskId: taskId, role: 'WORKER', user: councilAccount.address })
 
-  // Let's take a look at the newly created task
-  // const task = await userColonyClient.getTask.call({ taskId })
-  // console.log(task);
+  const tokenAddress = await userColonyClient.getToken.call();
+  const multiWorker = await userColonyClient.setTaskWorkerPayout.startOperation({ taskId: taskId, token: tokenAddress.address, amount: new bigNumber((1)) });    // Needs Manager and Worker
+  await multiWorker.sign();
 
-  // const taskInfo = await ecp.getTaskSpecification(task.specificationHash);
-  // console.log(taskInfo);
 
-  // Do some cleanup
-  // console.log('Task added.')
+  const json = multiWorker.toJSON();
+  const op = await councilColonyClient.setTaskWorkerPayout.restoreOperation(json);
+  await op.sign();
+  console.log('Should be Signed - Missing signees:')
+  console.log(op.missingSignees);
+
   await ecp.stop();
 }
 
@@ -126,14 +137,15 @@ exports.getTasks = async () => {
 
     var taskInfo = await ecp.getTaskSpecification(taskHash.specificationHash);
     // console.log(taskInfo);
-    tasks.push({id: i, location: taskInfo.location, comment: taskInfo.comment, subdomain: taskInfo.subdomain, date: taskInfo.date });
+    var roleInfo = await userColonyClient.getTaskRole.call({ taskId: i, role: 'MANAGER' });
+
+    tasks.push({id: i, location: taskInfo.location, comment: taskInfo.comment, subdomain: taskInfo.subdomain, date: taskInfo.date, manager: roleInfo.address });
 
     if(i == 2){
     console.log('Task: ' + taskInfo.location);
     console.log('Is Finalized: ' + taskHash.finalized);
 
     var payout = await userColonyClient.getTaskPayout.call({ taskId: i, role: 'MANAGER', token: tokenAddress.address });
-    var roleInfo = await userColonyClient.getTaskRole.call({ taskId: i, role: 'MANAGER' });
     console.log('Manager address: ' + roleInfo.address);
     console.log('Manager rated: ' + roleInfo.rated);
     console.log('Manager rating: ' + roleInfo.rating);
@@ -152,7 +164,7 @@ exports.getTasks = async () => {
     console.log('WORKER rating: ' + roleInfo.rating);
     console.log('Worker Payout: ' + payout.amount);
 
-    const multiWorker = await userColonyClient.setTaskWorkerPayout.startOperation({ taskId: i, token: tokenAddress.address, amount: new bigNumber(2) });    // Needs Manager and Worker
+    const multiWorker = await userColonyClient.setTaskWorkerPayout.startOperation({ taskId: i, token: tokenAddress.address, amount: new bigNumber((payout.amount + 1)) });    // Needs Manager and Worker
     console.log('Required singees:')
     console.log(multiWorker.requiredSignees);
     console.log('Missing signees:')
