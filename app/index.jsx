@@ -12,6 +12,6 @@ if(process.env.NODE_ENV !== 'production') {
 }
 
 ReactDOM.render(
-  <MyFancyComponent />,
+  <App />,
     document.getElementById('app')
 );

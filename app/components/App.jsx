@@ -2,6 +2,7 @@ import React from 'react';
 import uuid from 'uuid';
 import Tasks from './Tasks';
 import AddTask from './AddTask';
+import MyFancyComponent from './MyMapComponent';
 import {Bootstrap, Jumbotron, Button, Grid, Row, Col, Modal, OverlayTrigger, Popover, Tooltip } from 'react-bootstrap';
 
 const col = require('../libs/johnsColony');
@@ -70,9 +71,10 @@ export default class App extends React.Component {
     });
   }
 
-  addTask = (Task) => {
-    console.log('addTask(): ' + Task)
-    this.upDateColony(Task)
+  addColonyHole = (Hole) => {
+    console.log('addColonyHole()')
+    console.log(Hole)
+    // this.upDateColony(Task)
     //this.loadInit(this.state.value);
   }
   render() {
@@ -82,7 +84,7 @@ export default class App extends React.Component {
       <div>
           <h1>Fill The Hole! Test?</h1>
           <div>
-            <AddTask tasks={tasks} addTask={task => this.addTask(task)}/>
+            <MyFancyComponent recordHole={hole => this.addColonyHole(hole)}/>
           </div>
           <div>
             <h2>Holes Already Spotted</h2>
