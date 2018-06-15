@@ -12,7 +12,7 @@ export default class Tasks extends React.Component {
       const tasks = this.props.tasks;
       return (
           <ul>{tasks.map(task =>
-            <div><li key={task.id}>{task.date}: {task.location} - {task.comment}</li><Button bsStyle="primary" onClick={() => this.confirmRepaired(task.id)}>CONFIRM REPAIRED</Button></div>
+            <div><li key={task.id}>{task.date}: {task.location.lat}:{task.location.lng} {task.comment}</li><Button bsStyle="primary" onClick={() => this.confirmRepaired(task.id)}>CONFIRM REPAIRED</Button></div>
           )}</ul>
       );
     }

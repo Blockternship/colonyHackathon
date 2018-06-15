@@ -2,7 +2,7 @@ import React from 'react';
 import uuid from 'uuid';
 import Tasks from './Tasks';
 import AddTask from './AddTask';
-import MyFancyComponent from './MyMapComponent';
+import HoleMap from './HoleMapComponent';
 import {Bootstrap, Jumbotron, Button, Grid, Row, Col, Modal, OverlayTrigger, Popover, Tooltip } from 'react-bootstrap';
 
 const col = require('../libs/johnsColony');
@@ -12,42 +12,19 @@ export default class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      tasks: [{id: 1, location: 'Loading Data From Colony...', comment: '', subdomain: 1, date: new Date().toLocaleString() }],
-      subdomains: [
-        {id: 1, name: 'WLC', address: uuid.v4(), tasks: []},
-        {id: 2, name: 'Intelsat', address: uuid.v4(), tasks: []},
-      ]
+      tasks: [{id: uuid.v4(), location: {lat: 'Loading Data From Colony', lng:''}, comment: '', subdomain: 1, date: new Date().toLocaleString() }], // Displays while we wait to get data from Colony
     };
 
-    const loadedTasks = this.loadColonyTasks();
+    const loadedTasks = this.loadColonyTasks();                                                               // Load all the existing data from Colony
   }
-  async loadColonyTasks(){
+  async loadColonyTasks(){                                                                                    // Called from constructor to load all tasks from colony
     const tasks = await cTasks.getTasks();
     this.setState({
       tasks: tasks
     });
     return tasks;
   }
-  async loadInit(){
-
-    console.log('loadInit()')
-    const defaultColony = await col.startColony();         // Make sure default colony is loaded
-
-    const tasks = await cTasks.getTasks();
-    console.log('LOADING TASKS TO LOCAL: ')
-    console.log(tasks)
-    this.setState({
-      tasks: tasks
-    });
-  }
-  load = () => {
-    console.log('load()')
-    this.loadInit();
-  }
-  async upDateColony(Task){
-
-    console.log('upDateColony()')
-    console.log('Adding task: ' + Task)
+  async upDateColony(HoleInfo){                                                                               // Stores hole info from map into Colony
 
     const id = uuid.v4();
     const date = new Date().toLocaleString();
@@ -55,8 +32,8 @@ export default class App extends React.Component {
     const holeDetails = {
       id: id,
       date: date,
-      location: Task.location,
-      comment: Task.comment,
+      location: HoleInfo.markerPosition,
+      comment: HoleInfo.comment,
       subdomain: 1,
       isRepaired: false,
       isConfirmed: false,
@@ -64,31 +41,28 @@ export default class App extends React.Component {
 
     const holeInfo = await cTasks.recordHole(holeDetails);
 
-    console.log('Updating local storage');
-
     this.setState({
-      tasks: this.state.tasks.concat([holeDetails])
+      tasks: this.state.tasks.concat([holeDetails])                                                           // Update GUI locally immediately
     });
+
+    this.loadColonyTasks();                                                                                   // Load Colony data incase any other new Holes recorded
   }
 
   addColonyHole = (Hole) => {
-    console.log('addColonyHole()')
-    console.log(Hole)
-    // this.upDateColony(Task)
-    //this.loadInit(this.state.value);
+    this.upDateColony(Hole)
   }
   render() {
-    const tasks = this.state.tasks;
+    const holes = this.state.tasks;
 
     return (
       <div>
-          <h1>Fill The Hole! Test?</h1>
+          <h1>FIND THE POT (HOLE)</h1>
           <div>
-            <MyFancyComponent recordHole={hole => this.addColonyHole(hole)}/>
+            <HoleMap recordHole={hole => this.addColonyHole(hole)} existingHoles={holes}/>
           </div>
           <div>
             <h2>Holes Already Spotted</h2>
-            <Tasks tasks={tasks} />
+            <Tasks tasks={holes} />
           </div>
       </div>
     );

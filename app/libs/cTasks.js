@@ -1,5 +1,6 @@
 // Import the prerequisites
 //var bigNumber = require('bignumber.js');
+import uuid from 'uuid';
 var bigNumber = require('bn.js')
 const ecp = require('./ecp');
 const { providers, Wallet } = require('ethers');
@@ -103,7 +104,7 @@ exports.getTasks = async () => {
   var tasks = [];
 
   if(count.count == 0){
-    tasks.push({id: 'noData', location: 'No Holes Spotted', comment: 'Go On Be The First!', subdomain: 0, date: new Date().toLocaleString() })
+    tasks.push({id: uuid.v4(), location: {lat: 'No Holes Spotted', lng:''}, comment: 'Go On Be The First!', subdomain: 0, date: new Date().toLocaleString() })
   }
 
   await ecp.init();

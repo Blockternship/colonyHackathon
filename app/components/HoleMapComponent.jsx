@@ -18,6 +18,10 @@ const MyMapComponent = compose(
     defaultCenter={{ lat: 55.888215, lng: -3.427228 }}
     onClick={props.onMapClick}
   >
+    {props.existingHoles.map(hole =>
+      <Marker position={ {lat: hole.location.lat, lng: hole.location.lng}}>
+      </Marker>
+    )}
     <Marker position={props.markerPosition}>
       <InfoWindow>
         <div>
@@ -41,13 +45,14 @@ const MyMapComponent = compose(
   </GoogleMap>
 )
 
-export default class MyFancyComponent extends React.PureComponent {
+export default class HoleMap extends React.PureComponent {
   constructor(props) {
       super(props);
       this.state = {
         markerPosition: { lat: 55.888215, lng: -3.427228 },                                                   // Show marker in West Lothian on load
         comment: '',
       }
+      console.log(props)
   }
 
   handleRecordClick = () => {                                                                                 // Save lat/lng & comment to ColonyNetwork
@@ -67,12 +72,14 @@ export default class MyFancyComponent extends React.PureComponent {
   }
 
   render() {
+    const existingHoles = this.props.existingHoles;
     return (
       <MyMapComponent
         markerPosition={this.state.markerPosition}
         onRecordClick={this.handleRecordClick}
         onMapClick={this.handleMapClick}
         onCommentChange={this.handleCommentChange}
+        existingHoles={existingHoles}
       />
     )
   }
