@@ -127,6 +127,7 @@ exports.getTasks = async () => {
     // console.log(taskInfo);
     tasks.push({id: i, location: taskInfo.location, comment: taskInfo.comment, subdomain: taskInfo.subdomain, date: taskInfo.date });
 
+    if(i == 2){
     console.log('Task: ' + taskInfo.location);
     console.log('Is Finalized: ' + taskHash.finalized);
 
@@ -150,7 +151,7 @@ exports.getTasks = async () => {
     console.log('WORKER rating: ' + roleInfo.rating);
     console.log('Worker Payout: ' + payout.amount);
 
-    const multiWorker = await userColonyClient.setTaskWorkerPayout.startOperation({ taskId: i, token: tokenAddress.address, amount: new bigNumber(2500000) });    // Needs Manager and Worker
+    const multiWorker = await userColonyClient.setTaskWorkerPayout.startOperation({ taskId: i, token: tokenAddress.address, amount: new bigNumber(2) });    // Needs Manager and Worker
     console.log('Required singees:')
     console.log(multiWorker.requiredSignees);
     console.log('Missing signees:')
@@ -164,8 +165,22 @@ exports.getTasks = async () => {
     await op.sign();
     console.log('Worker Signed - Missing signees:')
     console.log(op.missingSignees);
-    //submitTaskDeliverable.send({ taskId, deliverableHash }, options)
 
+    console.log('Sending transaction...')
+    console.log(op)
+    const { successful } = await op.send();
+    console.log(successful);
+
+    payout = await userColonyClient.getTaskPayout.call({ taskId: i, role: 'WORKER', token: tokenAddress.address });
+    console.log('Worker Payout: ' + payout.amount);
+
+    //https://docs.colony.io/colonyjs/api-colonyclient/#submittaskworkratingsend-taskid-role-ratingsecret--options
+    //submitTaskWorkRating.send({ taskId, role, ratingSecret }, options)
+    //submitTaskWorkRating.send({ taskId, role, ratingSecret }, options)
+    //const response = await councilColonyClient.submitTaskDeliverable.send({ taskId: i, "test" })
+    //const response = await councilColonyClient.finalizeTask.send({ taskId: i });
+
+  }
 
     i++;
   }
