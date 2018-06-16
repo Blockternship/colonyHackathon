@@ -64,6 +64,11 @@ export default class App extends React.Component {
     this.loadColonyTasks();                                                                                   // Load Colony data incase any other new Holes recorded
   }
 
+  async upDateHole(TaskId, HoleInfo){
+    await cTasks.updateTask(TaskId, HoleInfo);
+    //this.loadColonyTasks();                                                                                   // Load Colony data incase any other new Holes recorded
+  }
+
   addColonyHole = (Hole) => {
     this.upDateColony(Hole)
   }
@@ -75,7 +80,7 @@ export default class App extends React.Component {
   }
   handleMarkAsRepaired = (Task) => {
     console.log('Marked As Repaired')
-    console.log(Task.comment);
+    console.log(Task);
     this.setState({
       tasks: this.state.tasks.map(task => {
         if(task.id === Task.id) {
@@ -84,10 +89,13 @@ export default class App extends React.Component {
         return task;
       })
     });
+
+    this.upDateHole(Task.id, Task);
     // NEED TO UPDATE IPFS
   }
   handleMarkAsConfirmed = (Task) => {
     console.log('Mark As Confirmed');
+    console.log(Task)
       this.setState({
         tasks: this.state.tasks.map(task => {
           if(task.id === Task.id) {
@@ -96,6 +104,8 @@ export default class App extends React.Component {
           return task;
         })
       });
+
+      this.upDateHole(Task.id, Task);
   }
   render() {
     const holes = this.state.tasks;

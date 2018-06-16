@@ -20,31 +20,22 @@ exports.getAddress = async (AddressNo) => {
   return account;
 }
 
+const getNetworkClient = async (Account) => {
+
+  const wallet = new Wallet(Account.privateKey, provider);
+  const adapter = new EthersAdapter({ loader, provider, wallet,});
+  // Connect to ColonyNetwork with the adapter!
+  const networkClient = new ColonyNetworkClient({ adapter });
+  await networkClient.init();
+  // For a colony that exists already, you just need its ID:
+  const userColonyClient = await networkClient.getColonyClient(1);
+  return userColonyClient;
+}
+
 exports.recordHole = async (UserAddress, CompanyAddress, HoleInfo) => {
 
   await ecp.init();
-  //const userAccount = await loader.getAccount(0);
-  //const privateKey = userAccount.privateKey;
-  /*
-  const privateKey = UserAddress.privateKey;
 
-  const wallet = new Wallet(privateKey, provider);                              // Create a wallet with the private key (so we have a balance we can use)
-
-  console.log(wallet)
-
-  const adapter = new EthersAdapter({                                           // Create an adapter (powered by ethers)
-    loader,
-    provider,
-    wallet,
-  });
-
-  console.log('1')
-  const networkClient = new ColonyNetworkClient({ adapter });                   // Connect to ColonyNetwork with the adapter!
-  await networkClient.init();
-  console.log('2')
-
-  const userColonyClient = await networkClient.getColonyClient(1);
-  */
   const userColonyClient = await getNetworkClient(UserAddress);
   const councilColonyClient = await getNetworkClient(CompanyAddress);
   console.log('3')
@@ -62,7 +53,6 @@ exports.recordHole = async (UserAddress, CompanyAddress, HoleInfo) => {
   const multiWorker = await userColonyClient.setTaskWorkerPayout.startOperation({ taskId: taskId, token: tokenAddress.address, amount: new bigNumber((1)) });    // Needs Manager and Worker
   await multiWorker.sign();
 
-
   const json = multiWorker.toJSON();
   const op = await councilColonyClient.setTaskWorkerPayout.restoreOperation(json);
   await op.sign();
@@ -72,37 +62,91 @@ exports.recordHole = async (UserAddress, CompanyAddress, HoleInfo) => {
   await ecp.stop();
 }
 
-const getNetworkClient = async (Account) => {
-
-  const wallet = new Wallet(Account.privateKey, provider);
-  const adapter = new EthersAdapter({ loader, provider, wallet,});
-  // Connect to ColonyNetwork with the adapter!
-  const networkClient = new ColonyNetworkClient({ adapter });
-  await networkClient.init();
-  // For a colony that exists already, you just need its ID:
-  const userColonyClient = await networkClient.getColonyClient(1);
-  return userColonyClient;
-}
-
 exports.getTasks = async () => {
-  /*
-  // Get the private key from the first account from the ganache-accounts
-  // through trufflepig
-  const { privateKey } = await loader.getAccount(0);
 
-  // Create a wallet with the private key (so we have a balance we can use)
-  const wallet = new Wallet(privateKey, provider);
+  const userAccount = await loader.getAccount(0);
+  const userColonyClient = await getNetworkClient(userAccount);
 
-  // Create an adapter (powered by ethers)
-  const adapter = new EthersAdapter({ loader, provider, wallet,});
+  const count = await userColonyClient.getTaskCount.call();
+  // console.log('Number of tasks deployed: ' + count.count);
 
-  // Connect to ColonyNetwork with the adapter!
-  const networkClient = new ColonyNetworkClient({ adapter });
-  await networkClient.init();
+  var tasks = [];
 
-  // For a colony that exists already, you just need its ID:
-  const userColonyClient = await networkClient.getColonyClient(1);
-  */
+  if(count.count == 0){
+    tasks.push({id: uuid.v4(), location: {lat: 'No Holes Spotted', lng:''}, comment: 'Go On Be The First!', subdomain: 0, date: new Date().toLocaleString() })
+  }
+
+  await ecp.init();
+
+  var i = 1;
+  while(i < count.count + 1){
+    var taskHash = await userColonyClient.getTask.call({ taskId:i });
+    console.log('getTasks() DEBUG')
+    console.log('ID: ' + i)
+    console.log(taskHash.specificationHash)
+
+    if(taskHash.specificationHash == null){
+      // console.log('Weird science...')
+      i++;
+      continue;
+    }
+
+    var taskInfo = await ecp.getTaskSpecification(taskHash.specificationHash);
+    var roleInfo = await userColonyClient.getTaskRole.call({ taskId: i, role: 'MANAGER' });
+
+    tasks.push({id: i, location: taskInfo.location, comment: taskInfo.comment, subdomain: taskInfo.subdomain, date: taskInfo.date, manager: roleInfo.address });
+    i++;
+  }
+
+  await ecp.stop();
+  return tasks;
+};
+
+exports.updateTask = async (TaskId, HoleInfo) => {
+
+  const userAccount = await loader.getAccount(0);
+  const userColonyClient = await getNetworkClient(userAccount);
+
+  const councilAccount = await loader.getAccount(1);
+  const councilColonyClient = await getNetworkClient(councilAccount);
+
+  const tokenAddress = await userColonyClient.getToken.call();
+
+  await ecp.init();
+
+  console.log('Update DEBUG')
+  console.log(TaskId)
+  console.log(HoleInfo)
+
+  const specificationHash = await ecp.saveTaskSpecification(HoleInfo);
+  console.log(specificationHash)
+
+  const multiWorker = await userColonyClient.setTaskBrief.startOperation({ taskId: TaskId, specificationHash: specificationHash })
+  await multiWorker.sign();
+
+  const json = multiWorker.toJSON();
+  const op = await councilColonyClient.setTaskBrief.restoreOperation(json);
+  await op.sign();
+  console.log('Update Brief Should be Signed - Missing signees:')
+  console.log(op.missingSignees);
+
+  //const { successful } = await op.send();      // Not working for some reason??
+  //console.log(successful);
+
+  //https://docs.colony.io/colonyjs/api-colonyclient/#submittaskworkratingsend-taskid-role-ratingsecret--options
+  //submitTaskWorkRating.send({ taskId, role, ratingSecret }, options)
+  //submitTaskWorkRating.send({ taskId, role, ratingSecret }, options)
+  if(HoleInfo.isRepaired){
+    const response = await councilColonyClient.submitTaskDeliverable.send({ taskId: TaskId, deliverableHash: specificationHash });
+  }
+  if(HoleInfo.isConfirmed){
+    const response = await councilColonyClient.finalizeTask.send({ taskId: TaskId });
+  }
+  await ecp.stop();
+};
+
+exports.getTasksOLD = async () => {   // DELETE WHEN DONE
+
   const userAccount = await loader.getAccount(0);
   const userColonyClient = await getNetworkClient(userAccount);
 
@@ -192,7 +236,6 @@ exports.getTasks = async () => {
     //submitTaskWorkRating.send({ taskId, role, ratingSecret }, options)
     //const response = await councilColonyClient.submitTaskDeliverable.send({ taskId: i, "test" })
     //const response = await councilColonyClient.finalizeTask.send({ taskId: i });
-
   }
 
     i++;
