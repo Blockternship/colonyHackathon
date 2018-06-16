@@ -1,7 +1,6 @@
 # Decentralised Issue Reporting - Pot(Hole) Hunting
 
 ## Description
-
 Service issues and how these are handled provide a strong indicator of how a company/operator/authority performs and the standard of the service. Potential clients/customers use this kind information when making the decision to sign-up. Companies, or at least well run companies, can use it to drive continuous improvement and provide a stronger product.
 
 At the moment if an operator even runs a trouble reporting system it will normally be centrally controlled by the operator itself. This means they control the data and the visibility of that data. Ultimately it means there is no real reliable accountability. Reported data can be inaccurate. Unwanted information can be hidden or even deleted.
