@@ -36,8 +36,7 @@ export default class HoleTable extends React.Component {
           <thead>
             <tr>
               <th>Date Recorded</th>
-              <th>Account Recorded</th>
-              <th>Location</th>
+              <th>Account Recorded (Manager)</th>
               <th>Comment</th>
               <th>Action</th>
             </tr>
@@ -49,6 +48,7 @@ export default class HoleTable extends React.Component {
                   hole={hole}
                   onRepairedClick={this.props.onRepairedClick}
                   onConfirmedClick={this.props.onConfirmedClick}
+                  onLocationClick={this.props.onLocationClick}
                   />
             )}
           </tbody>
@@ -61,6 +61,9 @@ export default class HoleTable extends React.Component {
 class HoleRow extends React.Component {
     constructor(props) {
       super(props);
+    }
+    locationClick(Lat, Lng){
+      this.props.onLocationClick(Lat, Lng);                                                                                             // Sets the center of the map to show user location of selected hole
     }
 
     render() {
@@ -89,13 +92,20 @@ class HoleRow extends React.Component {
       }
 
       return (
-          <tr key={hole.id}>
+          <tr key={hole.id} >
             <td>{hole.date}</td>
             <td>{hole.manager}</td>
-            <td>{lat}:{lng}</td>
-            <td>{hole.comment}</td>
+            <td onClick={() => this.locationClick(hole.location.lat, hole.location.lng)} style={styles.clickable}>{hole.comment}</td>
             <td>{button}</td>
           </tr>
       )
     }
 }
+
+const styles = {
+
+  clickable: {
+    color: 'blue',
+    textDecorationLine: 'underline',
+  },
+};

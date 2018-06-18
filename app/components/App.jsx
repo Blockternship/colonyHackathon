@@ -13,6 +13,7 @@ export default class App extends React.Component {
       holes: [{id: uuid.v4(), manager: 'Loading Data From Colony', location: {lat: 0, lng: 0}, comment: 'Please Wait', subdomain: 1, date: new Date().toLocaleString() }], // Displays while we wait to get data from Colony
       companyAddress: '',
       userAddress: '',
+      mapCenter: { lat: 55.888215, lng: -3.427228 },
     };
     const companyAdd = this.loadCompanyAddress(1);                                                            // Making Company address default to 1
     const userAdd = this.loadUserAddress(0);                                                                  // Making User address default to 0
@@ -90,16 +91,22 @@ export default class App extends React.Component {
 
       this.upDateHole(Hole.id, Hole);                                                                               // Update Colony
   }
+  handleMarkerPosition = (Lat, Lng) => {                                                                            // Adjust map center when user clicks on an existing record
+    this.setState({
+      mapCenter: { lat: Lat, lng: Lng }
+    })
+  }
   render() {
     const holes = this.state.holes;
     const compAdd = this.state.companyAddress.address;
     const userAdd = this.state.userAddress.address;
+    const mapCenter = this.state.mapCenter;
 
     return (
       <div>
           <h1>POT HOLE HUNTER</h1>
           <div>
-            <HoleMap recordHole={hole => this.recordHole(hole)} existingHoles={holes}/>
+            <HoleMap recordHole={hole => this.recordHole(hole)} existingHoles={holes} centerLocation={mapCenter}/>
           </div>
           <h2>Set-Up</h2>
             <p>For this demo we assume:</p>
@@ -108,6 +115,7 @@ export default class App extends React.Component {
           <div>
             <h2>Recorded Holes</h2>
             <HoleTable
+              onLocationClick={this.handleMarkerPosition}
               holes={holes}
               onRepairedClick={this.handleMarkAsRepaired}
               onConfirmedClick={this.handleMarkAsConfirmed}

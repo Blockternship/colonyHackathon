@@ -15,7 +15,7 @@ const MyMapComponent = compose(
 )((props) =>
   <GoogleMap
     defaultZoom={15}
-    defaultCenter={{ lat: 55.888215, lng: -3.427228 }}
+    center={props.centerLocation}
     onClick={props.onMapClick}
   >
     {props.existingHoles.map(hole =>
@@ -50,6 +50,7 @@ export default class HoleMap extends React.PureComponent {
       this.state = {
         markerPosition: { lat: 55.888215, lng: -3.427228 },                                                   // Show marker in West Lothian on load
         comment: '',
+        centerLocation: this.props.centerLocation,
       }
   }
 
@@ -71,8 +72,11 @@ export default class HoleMap extends React.PureComponent {
 
   render() {
     const existingHoles = this.props.existingHoles;
+    const centerLocation = this.props.centerLocation;
+
     return (
       <MyMapComponent
+        centerLocation={centerLocation}
         markerPosition={this.state.markerPosition}
         onRecordClick={this.handleRecordClick}
         onMapClick={this.handleMapClick}
