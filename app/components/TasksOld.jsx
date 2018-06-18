@@ -1,10 +1,51 @@
 import React from 'react';
 import {Button } from 'react-bootstrap';
 
-export default ({tasks}) => (
-  <div>
-  <ul>{tasks.map(task =>
-    <div><li key={task.id}>{task.date}: {task.location} - {task.comment}</li><Button bsStyle="primary">CONFIRM REPAIRED</Button></div>
-  )}</ul>
-  </div>
-);
+export default class Tasks extends React.Component {
+    constructor(props) {
+      super(props);
+    }
+
+    render() {
+      const tasks = this.props.tasks;
+
+      return (
+          <ul>{tasks.map(task =>
+              <Task
+                key={task.id}
+                task={task}
+                onRepairedClick={this.props.onRepairedClick}
+                onConfirmedClick={this.props.onConfirmedClick}
+                />
+          )}</ul>
+      );
+    }
+}
+
+class Task extends React.Component {
+    constructor(props) {
+      super(props);
+    }
+
+    render() {
+      const task = this.props.task;
+      let button;
+
+      if(task.isConfirmed){
+        button = <div>WELL DONE!</div>;
+      }
+      else if (task.isRepaired) {
+        button = <Button bsStyle="primary" onClick={() => this.props.onConfirmedClick(task)}>CONFIRM REPAIRED</Button>;
+      }
+      else{
+        button = <Button bsStyle="primary" onClick={() => this.props.onRepairedClick(task)}>MARK REPAIRED</Button>;
+      }
+
+      return (
+        <div>
+        <li key={task.id}>{task.date}: {task.manager} {task.location.lat}:{task.location.lng} {task.comment}</li>
+        {button}
+        </div>
+      )
+    }
+}

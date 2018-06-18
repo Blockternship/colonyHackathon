@@ -114,15 +114,16 @@ export default class App extends React.Component {
 
     return (
       <div>
-          <h1>FIND THE POT?? (HOLE)</h1>
+          <h1>POT HOLE HUNTER</h1>
           <div>
             <HoleMap recordHole={hole => this.addColonyHole(hole)} existingHoles={holes}/>
           </div>
           <h2>Set-Up</h2>
-          For this demo we assume the user is account(0): {userAdd}
-          For this demo we assume the company/worker is account(1): {compAdd}
+            <p>For this demo we assume:</p>
+            <p>User is account(0): {userAdd}</p>
+            <p>Company/worker is account(1): {compAdd}</p>
           <div>
-            <h2>Holes Already Spotted</h2>
+            <h2>Recorded Holes</h2>
             <Tasks
               tasks={holes}
               onRepairedClick={this.handleMarkAsRepaired}

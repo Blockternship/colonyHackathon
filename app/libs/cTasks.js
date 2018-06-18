@@ -8,7 +8,6 @@ const { default: EthersAdapter } = require('@colony/colony-js-adapter-ethers');
 const { TrufflepigLoader } = require('@colony/colony-js-contract-loader-http');
 // Import the ColonyNetworkClient
 const { default: ColonyNetworkClient } = require('@colony/colony-js-client');
-
 // Create an instance of the Trufflepig contract loader
 const loader = new TrufflepigLoader();
 
@@ -21,6 +20,12 @@ exports.getAddress = async (AddressNo) => {
 }
 
 const getNetworkClient = async (Account) => {
+
+  // Create an instance of the Trufflepig contract loader
+  const loader = new TrufflepigLoader();
+
+  // Create a provider for local TestRPC (Ganache)
+  const provider = new providers.JsonRpcProvider('http://localhost:8545/');
 
   const wallet = new Wallet(Account.privateKey, provider);
   const adapter = new EthersAdapter({ loader, provider, wallet,});
@@ -49,16 +54,22 @@ exports.recordHole = async (UserAddress, CompanyAddress, HoleInfo) => {
   const councilAccount = await loader.getAccount(1);
   await userColonyClient.setTaskRoleUser.send({ taskId: taskId, role: 'WORKER', user: councilAccount.address })
 
+  /*
+  console.log('6')
   const tokenAddress = await userColonyClient.getToken.call();
-  const multiWorker = await userColonyClient.setTaskWorkerPayout.startOperation({ taskId: taskId, token: tokenAddress.address, amount: new bigNumber((1)) });    // Needs Manager and Worker
+  console.log('7')
+  const multiWorker = await userColonyClient.setTaskWorkerPayout.startOperation({ taskId: taskId, source: tokenAddress.address, amount: new bigNumber(1) });    // Needs Manager and Worker
+  console.log('8')
   await multiWorker.sign();
-
+  console.log('9')
   const json = multiWorker.toJSON();
+  console.log('10')
   const op = await councilColonyClient.setTaskWorkerPayout.restoreOperation(json);
+  console.log('11')
   await op.sign();
   console.log('Should be Signed - Missing signees:')
   console.log(op.missingSignees);
-
+  */
   await ecp.stop();
 }
 
@@ -66,6 +77,13 @@ exports.getTasks = async () => {
 
   const userAccount = await loader.getAccount(0);
   const userColonyClient = await getNetworkClient(userAccount);
+
+  const userAccount1 = await loader.getAccount(1);
+  // const userAccount2 = await loader.getAccount(2);
+  // const userAccoun3 = await loader.getAccount(3);
+
+  await userColonyClient.authority.setUserRole.send({ user: userAccount1.address, role: 'ADMIN' });
+  //await userColonyClient.authority.setUserRole.send({ user: userAccount3.address, role: 'ADMIN' });
 
   const count = await userColonyClient.getTaskCount.call();
   // console.log('Number of tasks deployed: ' + count.count);
@@ -120,7 +138,7 @@ exports.updateTask = async (TaskId, HoleInfo) => {
 
   const specificationHash = await ecp.saveTaskSpecification(HoleInfo);
   console.log(specificationHash)
-
+  /*
   const multiWorker = await userColonyClient.setTaskBrief.startOperation({ taskId: TaskId, specificationHash: specificationHash })
   await multiWorker.sign();
 
@@ -129,6 +147,7 @@ exports.updateTask = async (TaskId, HoleInfo) => {
   await op.sign();
   console.log('Update Brief Should be Signed - Missing signees:')
   console.log(op.missingSignees);
+  */
 
   //const { successful } = await op.send();      // Not working for some reason??
   //console.log(successful);
@@ -136,12 +155,15 @@ exports.updateTask = async (TaskId, HoleInfo) => {
   //https://docs.colony.io/colonyjs/api-colonyclient/#submittaskworkratingsend-taskid-role-ratingsecret--options
   //submitTaskWorkRating.send({ taskId, role, ratingSecret }, options)
   //submitTaskWorkRating.send({ taskId, role, ratingSecret }, options)
+  /*
+  Below throws error: Uncaught (in promise) Error: VM Exception while processing transaction: revert
   if(HoleInfo.isRepaired){
     const response = await councilColonyClient.submitTaskDeliverable.send({ taskId: TaskId, deliverableHash: specificationHash });
   }
   if(HoleInfo.isConfirmed){
     const response = await councilColonyClient.finalizeTask.send({ taskId: TaskId });
   }
+  */
   await ecp.stop();
 };
 

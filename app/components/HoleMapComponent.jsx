@@ -19,8 +19,8 @@ const MyMapComponent = compose(
     onClick={props.onMapClick}
   >
     {props.existingHoles.map(hole =>
-      <Marker key={hole.id} position={ {lat: hole.location.lat, lng: hole.location.lng}}>
-      </Marker>
+      <HoleMarker hole={hole}></HoleMarker>
+
     )}
     <Marker position={props.markerPosition}>
       <InfoWindow>
@@ -83,4 +83,26 @@ export default class HoleMap extends React.PureComponent {
       />
     )
   }
+}
+
+class HoleMarker extends React.Component {
+    constructor(props) {
+      super(props);
+    }
+
+    render() {
+      const hole = this.props.hole;
+
+      var icon = 'http://maps.google.com/mapfiles/ms/icons/red-dot.png'
+      if(hole.isConfirmed){
+        icon = 'http://maps.google.com/mapfiles/ms/icons/green-dot.png'
+      }
+      else if (hole.isRepaired) {
+        icon = 'http://maps.google.com/mapfiles/ms/icons/orange-dot.png'
+      }
+
+      return (
+        <Marker key={hole.id} position={ {lat: hole.location.lat, lng: hole.location.lng}} icon={icon}></Marker>
+      )
+    }
 }

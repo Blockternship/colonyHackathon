@@ -59,9 +59,9 @@
     "webpack-validator": "^2.1.1"
   },
   "dependencies": {
-    "@colony/colony-js-adapter-ethers": "^1.2.1",
-    "@colony/colony-js-client": "^1.2.1",
-    "@colony/colony-js-contract-loader-http": "^1.2.0",
+    "@colony/colony-js-adapter-ethers": "^1.4.1",
+    "@colony/colony-js-client": "^1.4.1",
+    "@colony/colony-js-contract-loader-http": "^1.4.1",
     "alt": "^0.18.6",
     "alt-container": "^1.1.1",
     "alt-utils": "^2.0.0",
