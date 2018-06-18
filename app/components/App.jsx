@@ -1,49 +1,45 @@
 import React from 'react';
 import uuid from 'uuid';
-import Tasks from './Tasks';
-import AddTask from './AddTask';
+import HoleTable from './HoleTable';
 import HoleMap from './HoleMapComponent';
-import {Bootstrap, Jumbotron, Button, Grid, Row, Col, Modal, OverlayTrigger, Popover, Tooltip, Radio, FormGroup, ControlLabel } from 'react-bootstrap';
 
-const col = require('../libs/johnsColony');
-const cTasks = require('../libs/cTasks');
+const colonyHelper = require('../libs/colonyHelper');
 
 export default class App extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      tasks: [{id: uuid.v4(), location: {lat: 'Loading Data From Colony', lng:''}, comment: '', subdomain: 1, date: new Date().toLocaleString() }], // Displays while we wait to get data from Colony
+      holes: [{id: uuid.v4(), manager: 'Loading Data From Colony', location: {lat: 0, lng: 0}, comment: 'Please Wait', subdomain: 1, date: new Date().toLocaleString() }], // Displays while we wait to get data from Colony
       companyAddress: '',
       userAddress: '',
     };
-    const companyAdd = this.loadCompanyAddress(1);
-    const userAdd = this.loadUserAddress(0);
-    const loadedTasks = this.loadColonyTasks();                                                               // Load all the existing data from Colony
+    const companyAdd = this.loadCompanyAddress(1);                                                            // Making Company address default to 1
+    const userAdd = this.loadUserAddress(0);                                                                  // Making User address default to 0
+    this.loadColonyHoles();                                                                                   // Load all the existing data from Colony
   }
   async loadCompanyAddress(AddressNo){
-    const add = await cTasks.getAddress(AddressNo);
+    const add = await colonyHelper.getAccountInfo(AddressNo);
     this.setState({
       companyAddress: add
     });
   }
   async loadUserAddress(AddressNo){
-    const add = await cTasks.getAddress(AddressNo);
+    const add = await colonyHelper.getAccountInfo(AddressNo);
     this.setState({
       userAddress: add
     });
   }
-  async loadColonyTasks(){                                                                                    // Called from constructor to load all tasks from colony
-    const tasks = await cTasks.getTasks();
+  async loadColonyHoles(){                                                                                    // Called from constructor to load all holes from colony
+    const holes = await colonyHelper.getTasks();
     this.setState({
-      tasks: tasks
+      holes: holes
     });
-    return tasks;
   }
-  async upDateColony(HoleInfo){                                                                               // Stores hole info from map into Colony
+  async saveHoleToColony(HoleInfo){                                                                               // Stores hole info to Colony
 
     const id = uuid.v4();
-    const date = new Date().toLocaleString();
+    const date = new Date().toLocaleString();                                                                     // Date/time of record
 
     const holeDetails = {
       id: id,
@@ -51,64 +47,51 @@ export default class App extends React.Component {
       location: HoleInfo.markerPosition,
       comment: HoleInfo.comment,
       subdomain: 1,
-      isRepaired: false,
+      isRepaired: false,                                                                                          // These default to false on first save so that users can score, etc
       isConfirmed: false,
     };
 
-    const holeInfo = await cTasks.recordHole(this.state.userAddress, this.state.companyAddress, holeDetails);
+    const holeInfo = await colonyHelper.recordHole(this.state.userAddress, this.state.companyAddress, holeDetails); // Does actual Colony update
 
     this.setState({
-      tasks: this.state.tasks.concat([holeDetails])                                                           // Update GUI locally immediately
+      holes: this.state.holes.concat([holeDetails])                                                               // Update GUI locally immediately
     });
 
-    this.loadColonyTasks();                                                                                   // Load Colony data incase any other new Holes recorded
+    this.loadColonyHoles();                                                                                       // Load Colony data incase any other new Holes recorded
   }
-
-  async upDateHole(TaskId, HoleInfo){
-    await cTasks.updateTask(TaskId, HoleInfo);
-    //this.loadColonyTasks();                                                                                   // Load Colony data incase any other new Holes recorded
+  recordHole = (Hole) => {
+    this.saveHoleToColony(Hole);                                                                                  // Called when map clicked
   }
-
-  addColonyHole = (Hole) => {
-    this.upDateColony(Hole)
+  async upDateHole(TaskId, HoleInfo){                                                                             // Saves new hole info to Colony/IPFS
+    await colonyHelper.updateTask(TaskId, HoleInfo);
+    //this.loadColonyHoles();                                                                                     // Load Colony data incase any other new Holes recorded
   }
-  handleChange(event){
-    console.log(event)
-    console.log(event.target.checked)
-    console.log(event.target.value)
-    const userAdd = this.loadUserAddress(event.target.value);
-  }
-  handleMarkAsRepaired = (Task) => {
-    console.log('Marked As Repaired')
-    console.log(Task);
-    this.setState({
-      tasks: this.state.tasks.map(task => {
-        if(task.id === Task.id) {
-          task.isRepaired = true;
+  handleMarkAsRepaired = (Hole) => {                                                                              // When existing Hole is marked as repaired by Worker
+    this.setState({                                                                                               // Update local GUI
+      holes: this.state.holes.map(hole => {
+        if(hole.id === Hole.id) {
+          hole.isRepaired = true;
         }
-        return task;
+        return hole;
       })
     });
 
-    this.upDateHole(Task.id, Task);
-    // NEED TO UPDATE IPFS
+    this.upDateHole(Hole.id, Hole);                                                                                 // Update Colony
   }
-  handleMarkAsConfirmed = (Task) => {
-    console.log('Mark As Confirmed');
-    console.log(Task)
-      this.setState({
-        tasks: this.state.tasks.map(task => {
-          if(task.id === Task.id) {
-            task.isConfirmed = true;
+  handleMarkAsConfirmed = (Hole) => {                                                                               // When existing Hole is marked as confirmed repaired by Evaluator
+      this.setState({                                                                                               // Update local GUI
+        holes: this.state.holes.map(hole => {
+          if(hole.id === Hole.id) {
+            hole.isConfirmed = true;
           }
-          return task;
+          return hole;
         })
       });
 
-      this.upDateHole(Task.id, Task);
+      this.upDateHole(Hole.id, Hole);                                                                               // Update Colony
   }
   render() {
-    const holes = this.state.tasks;
+    const holes = this.state.holes;
     const compAdd = this.state.companyAddress.address;
     const userAdd = this.state.userAddress.address;
 
@@ -116,7 +99,7 @@ export default class App extends React.Component {
       <div>
           <h1>POT HOLE HUNTER</h1>
           <div>
-            <HoleMap recordHole={hole => this.addColonyHole(hole)} existingHoles={holes}/>
+            <HoleMap recordHole={hole => this.recordHole(hole)} existingHoles={holes}/>
           </div>
           <h2>Set-Up</h2>
             <p>For this demo we assume:</p>
@@ -124,8 +107,8 @@ export default class App extends React.Component {
             <p>Company/worker is account(1): {compAdd}</p>
           <div>
             <h2>Recorded Holes</h2>
-            <Tasks
-              tasks={holes}
+            <HoleTable
+              holes={holes}
               onRepairedClick={this.handleMarkAsRepaired}
               onConfirmedClick={this.handleMarkAsConfirmed}
               />

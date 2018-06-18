@@ -1,7 +1,7 @@
 import React from 'react'
 import { compose, withProps } from 'recompose'
 import { withScriptjs, withGoogleMap, GoogleMap, Marker, InfoWindow} from 'react-google-maps'
-import {FormGroup, ControlLabel, FormControl, HelpBlock, Button } from 'react-bootstrap';
+import {FormGroup, FormControl, Button } from 'react-bootstrap';
 
 const MyMapComponent = compose(
   withProps({
@@ -19,8 +19,7 @@ const MyMapComponent = compose(
     onClick={props.onMapClick}
   >
     {props.existingHoles.map(hole =>
-      <HoleMarker hole={hole}></HoleMarker>
-
+      <HoleMarker key={hole.id} hole={hole}></HoleMarker>
     )}
     <Marker position={props.markerPosition}>
       <InfoWindow>
@@ -52,12 +51,11 @@ export default class HoleMap extends React.PureComponent {
         markerPosition: { lat: 55.888215, lng: -3.427228 },                                                   // Show marker in West Lothian on load
         comment: '',
       }
-      console.log(props)
   }
 
   handleRecordClick = () => {                                                                                 // Save lat/lng & comment to ColonyNetwork
-    console.log('Marker clicked: ' + this.state.markerPosition.lat + ',' + this.state.markerPosition.lng);
-    console.log(this.state.comment);
+    // console.log('Marker clicked: ' + this.state.markerPosition.lat + ',' + this.state.markerPosition.lng);
+    // console.log(this.state.comment);
     this.props.recordHole(this.state);
   }
 

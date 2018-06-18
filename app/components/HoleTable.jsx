@@ -1,13 +1,13 @@
 import React from 'react';
 import {Button, Table, Radio } from 'react-bootstrap';
 
-export default class Tasks extends React.Component {
+export default class HoleTable extends React.Component {
     constructor(props) {
       super(props);
     }
 
     render() {
-      const tasks = this.props.tasks;
+      const holes = this.props.holes;
 
       return (
 
@@ -22,10 +22,10 @@ export default class Tasks extends React.Component {
             </tr>
           </thead>
           <tbody>
-            {tasks.map(task =>
+            {holes.map(hole =>
                 <HoleRow
-                  key={task.id}
-                  task={task}
+                  key={hole.id}
+                  hole={hole}
                   onRepairedClick={this.props.onRepairedClick}
                   onConfirmedClick={this.props.onConfirmedClick}
                   />
@@ -42,13 +42,15 @@ class HoleRow extends React.Component {
     }
 
     render() {
-      const task = this.props.task;
+      const hole = this.props.hole;
       let button;
+      const lat = hole.location.lat.toFixed(2);
+      const lng = hole.location.lng.toFixed(2);
 
-      if(task.isConfirmed){
+      if(hole.isConfirmed){
         button = <div>THIS HAS BEEN REPAIRED</div>;
       }
-      else if (task.isRepaired) {
+      else if (hole.isRepaired) {
         button = <div><Radio name="radioGroup" value='1' inline>
                         1
                       </Radio>{' '}
@@ -58,18 +60,18 @@ class HoleRow extends React.Component {
                       <Radio name="radioGroup" value='3' inline>
                         3
                       </Radio>
-                      <Button bsStyle="primary" onClick={() => this.props.onConfirmedClick(task)}>CONFIRM & RATE REPAIR</Button></div>;
+                      <Button bsStyle="primary" onClick={() => this.props.onConfirmedClick(hole)}>CONFIRM & RATE REPAIR</Button></div>;
       }
       else{
-        button = <Button bsStyle="primary" onClick={() => this.props.onRepairedClick(task)}>MARK AS REPAIRED</Button>;
+        button = <Button bsStyle="primary" onClick={() => this.props.onRepairedClick(hole)}>MARK AS REPAIRED</Button>;
       }
 
       return (
-          <tr key={task.id}>
-            <td>{task.date}</td>
-            <td>{task.manager}</td>
-            <td>{task.location.lat.toFixed(2)}:{task.location.lng.toFixed(2)}</td>
-            <td>{task.comment}</td>
+          <tr key={hole.id}>
+            <td>{hole.date}</td>
+            <td>{hole.manager}</td>
+            <td>{lat}:{lng}</td>
+            <td>{hole.comment}</td>
             <td>{button}</td>
           </tr>
       )
