@@ -14,6 +14,7 @@ export default class App extends React.Component {
       companyAddress: '',
       userAddress: '',
       mapCenter: { lat: 55.888215, lng: -3.427228 },
+      rating: 0,
     };
     const companyAdd = this.loadCompanyAddress(1);                                                            // Making Company address default to 1
     const userAdd = this.loadUserAddress(0);                                                                  // Making User address default to 0
@@ -48,6 +49,7 @@ export default class App extends React.Component {
       location: HoleInfo.markerPosition,
       comment: HoleInfo.comment,
       subdomain: 1,
+      rating: 1,
       isRepaired: false,                                                                                          // These default to false on first save so that users can score, etc
       isConfirmed: false,
     };
@@ -79,11 +81,13 @@ export default class App extends React.Component {
 
     this.upDateHole(Hole.id, Hole);                                                                                 // Update Colony
   }
-  handleMarkAsConfirmed = (Hole) => {                                                                               // When existing Hole is marked as confirmed repaired by Evaluator
+  handleMarkAsConfirmed = (Hole, Rating) => {                                                                               // When existing Hole is marked as confirmed repaired by Evaluator
+      console.log('Confirmed rating: ' + Rating)
       this.setState({                                                                                               // Update local GUI
         holes: this.state.holes.map(hole => {
           if(hole.id === Hole.id) {
             hole.isConfirmed = true;
+            hole.rating = Rating;
           }
           return hole;
         })
@@ -94,6 +98,12 @@ export default class App extends React.Component {
   handleMarkerPosition = (Lat, Lng) => {                                                                            // Adjust map center when user clicks on an existing record
     this.setState({
       mapCenter: { lat: Lat, lng: Lng }
+    })
+  }
+  handleRating = (Rating) => {
+    console.log('Rating: ' + Rating)
+    this.setState({
+      rating: Rating
     })
   }
   render() {
@@ -119,6 +129,7 @@ export default class App extends React.Component {
               holes={holes}
               onRepairedClick={this.handleMarkAsRepaired}
               onConfirmedClick={this.handleMarkAsConfirmed}
+              onRatingClick={this.handleRating}
               />
           </div>
       </div>

@@ -49,6 +49,7 @@ export default class HoleTable extends React.Component {
                   onRepairedClick={this.props.onRepairedClick}
                   onConfirmedClick={this.props.onConfirmedClick}
                   onLocationClick={this.props.onLocationClick}
+                  onRatingClick={this.props.onRatingClick}
                   />
             )}
           </tbody>
@@ -61,9 +62,18 @@ export default class HoleTable extends React.Component {
 class HoleRow extends React.Component {
     constructor(props) {
       super(props);
+      this.state = {
+        rating: 0
+      };
     }
     locationClick(Lat, Lng){
       this.props.onLocationClick(Lat, Lng);                                                                                             // Sets the center of the map to show user location of selected hole
+    }
+    ratingClick(event){
+      //this.props.onRatingClick(event.target.value);
+      this.setState({
+        rating: event.target.value
+      });
     }
 
     render() {
@@ -73,19 +83,19 @@ class HoleRow extends React.Component {
       const lng = hole.location.lng.toFixed(2);
 
       if(hole.isConfirmed){
-        button = <div>THIS HAS BEEN REPAIRED</div>;
+        button = <div>THIS HAS BEEN REPAIRED. RATED: {hole.rating}</div>;
       }
       else if (hole.isRepaired) {
-        button = <div><Radio name="radioGroup" value='1' inline>
+        button = <div><Radio name="radioGroup" value='1' inline onClick={this.ratingClick.bind(this)}>
                         1
                       </Radio>{' '}
-                      <Radio name="radioGroup" value='2' inline>
+                      <Radio name="radioGroup" value='2' inline onClick={this.ratingClick.bind(this)}>
                         2
                       </Radio>{' '}
-                      <Radio name="radioGroup" value='3' inline>
+                      <Radio name="radioGroup" value='3' inline onClick={this.ratingClick.bind(this)}>
                         3
                       </Radio>
-                      <Button bsStyle="primary" onClick={() => this.props.onConfirmedClick(hole)}>CONFIRM & RATE REPAIR</Button></div>;
+                      <Button bsStyle="primary" onClick={() => this.props.onConfirmedClick(hole, this.state.rating)}>CONFIRM & RATE REPAIR</Button></div>;
       }
       else{
         button = <Button bsStyle="primary" onClick={() => this.props.onRepairedClick(hole)}>MARK AS REPAIRED</Button>;
