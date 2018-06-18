@@ -9,8 +9,29 @@ export default class HoleTable extends React.Component {
     render() {
       const holes = this.props.holes;
 
-      return (
+      var total = 0;
+      var unRepaired = 0;
+      var waitingEval = 0;
+      var repaired = 0;
+      holes.map(hole => {
+          total++;
+          if(hole.isConfirmed){
+            repaired++;
+          }
+          else if(hole.isRepaired){
+            waitingEval++;
+          }
+          else {
+            unRepaired++;
+          }
+        });
 
+      return (
+        <div>
+          <h5>Total Holes Reported: {total}</h5>
+          <h5>Unrepaired: {unRepaired}</h5>
+          <h5>Waiting Evaluation: {waitingEval}</h5>
+          <h5>Repaired: {repaired}</h5>
         <Table responsive>
           <thead>
             <tr>
@@ -32,6 +53,7 @@ export default class HoleTable extends React.Component {
             )}
           </tbody>
         </Table>
+        </div>
       );
     }
 }
