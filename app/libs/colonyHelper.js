@@ -20,7 +20,7 @@ exports.getAccountInfo = async (AccountNo) => {                                 
 const createPotHoleColony = async (networkClient) => {
 
   console.log('Creating Pot Hole Hunters Colony...');
-  const tokenAddress = await networkClient.createToken({
+  const tokenAddress = await networkClient.createToken({                                                            // Creates the local Colony which should be ID 2
       name: 'Pot Hole Hunters',
       symbol: 'PHH',
     });
@@ -29,7 +29,7 @@ const createPotHoleColony = async (networkClient) => {
       eventData: { colonyId, colonyAddress },
     } = await networkClient.createColony.send({ tokenAddress });
 
-  console.log('Token address: ' + tokenAddress);
+  console.log('PHH Token address: ' + tokenAddress);
   console.log('Colony ID: ' + colonyId);
   console.log('Colony address: ' + colonyAddress);
 }
@@ -43,8 +43,8 @@ const getNetworkClient = async (Account) => {
   await networkClient.init();
 
   const count = await networkClient.getColonyCount.call();
-  console.log('Number of colonies deployed: ' + count.count);
-  if(count.count < 2){
+
+  if(count.count < 2){                                                                                                                                    // We want to add tasks, etc to our own Colony so create if not exist
     await createPotHoleColony(networkClient);
   }
 
@@ -69,28 +69,29 @@ exports.recordHole = async (UserAddress, CompanyAddress, HoleInfo) => {         
   await userColonyClient.setTaskRoleUser.send({ taskId: taskId, role: 'WORKER', user: councilAccount.address })                                           // Makes 'Company' the WORKER by default as they are responsible
 
   const tokenAddress = await userColonyClient.getToken.call();
-  console.log(tokenAddress.address)
-  console.log('1')
-  const multiWorker = await userColonyClient.setTaskWorkerPayout.startOperation({ taskId: taskId, source: tokenAddress.address, amount: new bigNumber(1) });    // Needs Manager and Worker
-  console.log('2')
+
+  await userColonyClient.setTaskManagerPayout.send({ taskId: taskId, source: tokenAddress.address, amount: new bigNumber(1) });                           // Set Manager payout (mainly for rep)
+  // Could set the Evaluator payout here but needs the Evaluator signature and we dont know who Evaluator is yet.
+  const multiWorker = await userColonyClient.setTaskWorkerPayout.startOperation({ taskId: taskId, source: tokenAddress.address, amount: new bigNumber(1) });    // Sets Worker payout. Needs Manager and Worker
+
   await multiWorker.sign();
 
   const json = multiWorker.toJSON();
-  const op = await councilColonyClient.setTaskWorkerPayout.restoreOperation(json);
+  const op = await councilColonyClient.setTaskWorkerPayout.restoreOperation(json);                                                                        // Part2 of multi-sig
 
   await op.sign();
-  console.log('Should be Signed - Missing signees:')
-  console.log(op.missingSignees);
-  const { successful } = await op.send();      // Not working for some reason??
-  console.log(successful);
+  //console.log(op.missingSignees);
+
+  const { successful } = await op.send();
+  if(successful){
+    console.log('WORKER Payout Set.')
+  }
+  else{
+    //Would have to handle this.
+  }
 
   await ecp.stop();
 }
-  /*
-  THE FOLLOWING WOULD SET THE PAYOUT USING MULTISIG BUT IS FAILING
-  Throws error - throws: Uncaught (in promise) Error: VM Exception while processing transaction: revert
-  Tried setting to ADMIN and also update to latest versions as suggested on Gitter but still not working.
-  */
 
 exports.getTasks = async () => {                                                                                                                    // Gets the existing holes/tasks stored on Colony
 
@@ -118,7 +119,6 @@ exports.getTasks = async () => {                                                
       continue;
     }
 
-    console.log('Get Task Spec Hash: ' + i + ': ' + taskHash.specificationHash)
     var taskInfo = await ecp.getTaskSpecification(taskHash.specificationHash);                                                                          // Get IPFS data
     var roleInfo = await userColonyClient.getTaskRole.call({ taskId: i, role: 'MANAGER' });                                                             // This is the account that recorded hole
 
@@ -143,11 +143,13 @@ exports.updateTask = async (TaskId, HoleInfo) => {                              
   await ecp.init();
 
   //////////////////////
+  /*
   console.log('Check:')
   var taskHash = await userColonyClient.getTask.call({ taskId: TaskId });
   console.log(taskHash.specificationHash)
   var taskInfo = await ecp.getTaskSpecification(taskHash.specificationHash);
   console.log(taskInfo)
+  */
   ///////////////////////
 
   const specificationHash = await ecp.saveTaskSpecification(HoleInfo);                                                                    // Saves new hole info to IPFS and gets new hash
@@ -156,26 +158,34 @@ exports.updateTask = async (TaskId, HoleInfo) => {                              
   await multiWorker.sign();
 
   const json = multiWorker.toJSON();
-  const op = await councilColonyClient.setTaskBrief.restoreOperation(json);
+  const op = await councilColonyClient.setTaskBrief.restoreOperation(json);                                                               // Part2 of multisig
   await op.sign();
-  console.log('Update Brief Should be Signed - Missing signees:')
-  console.log(op.missingSignees);
+  // console.log(op.missingSignees);
 
   const { successful } = await op.send();                                                                                                 // Not working for some reason??
-  console.log(successful);
+  if(successful){
+    console.log('Hole Updated Successfully.')
+  }
+  else{
+    //Would have to handle this.
+  }
 
   //////////////////////
+  /*
   console.log('Check:')
   taskHash = await userColonyClient.getTask.call({ taskId: TaskId });
   console.log(taskHash.specificationHash)
   taskInfo = await ecp.getTaskSpecification(taskHash.specificationHash);
   console.log(taskInfo)
+  */
   ///////////////////////
 
   if(HoleInfo.isRepaired){
     const response = await councilColonyClient.submitTaskDeliverable.send({ taskId: TaskId, deliverableHash: specificationHash });          // If the Hole is marked repaired by Company the task is delivered
   }
   if(HoleInfo.isConfirmed){
+    const secretRating = await userColonyClient.generateSecret.call({ salt: 'saltysaltsale', value: new bigNumber(1) });
+    await userColonyClient.submitTaskWorkRating.send({ taskId: TaskId, role: 'WORKER', ratingSecret: secretRating.secret });       // Submit recorded rating for WORKER. In future we'd add a way for Company to counter score.
     const response = await councilColonyClient.finalizeTask.send({ taskId: TaskId });                                                       // Once work is confirmed by Evaluator the task is finalised
   }
 
