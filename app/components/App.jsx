@@ -2,8 +2,17 @@ import React from 'react';
 import uuid from 'uuid';
 import HoleTable from './HoleTable';
 import HoleMap from './HoleMapComponent';
+import { Button } from 'react-bootstrap';
 
 const colonyHelper = require('../libs/colonyHelper');
+
+import { Connect, SimpleSigner } from 'uport-connect';
+
+const uport = new Connect('ColonyHackathon', {
+  clientId: '2otq1ggwgQDn1RHSqoam7NQ8XF5sFmEsfUZ',
+  network: 'rinkeby',
+  signer: SimpleSigner('7bacfa70428efa6d8ada0ce66f8ebe162c95c91b0e8f7fe83845729fbd94f587')
+})
 
 export default class App extends React.Component {
   constructor(props) {
@@ -15,6 +24,7 @@ export default class App extends React.Component {
       userAddress: '',
       mapCenter: { lat: 55.888215, lng: -3.427228 },
       rating: 0,
+      uportMessage: '',
     };
     const companyAdd = this.loadCompanyAddress(1);                                                            // Making Company address default to 1
     const userAdd = this.loadUserAddress(0);                                                                  // Making User address default to 0
@@ -106,15 +116,29 @@ export default class App extends React.Component {
       rating: Rating
     })
   }
+  handleUportSignin = () => {
+    /*
+    At the moment this is just showing that I can integrate with uPort. When a user clicks Sign In and authenticates with uPort app the user name is dispalyed.
+    I didn't have time to figure out how to reference the rinkeby account details to my Ganache accounts to then interact with Colony, etc.
+    In the future using uPort seems like a nice way to authenticate users for reporting/evaluating holes and getting company/worker info.
+    */
+    uport.requestCredentials({requested: ['name', 'avatar']}).then((credentials) => {
+      this.setState({
+        uportMessage: credentials.name + ' has signed in.'
+      })
+    })
+  }
   render() {
     const holes = this.state.holes;
     const compAdd = this.state.companyAddress.address;
     const userAdd = this.state.userAddress.address;
     const mapCenter = this.state.mapCenter;
+    const uportMessage = this.state.uportMessage;
 
     return (
       <div>
           <h1>POT HOLE HUNTER</h1>
+          <div><Button bsStyle="primary" onClick={this.handleUportSignin}>Sign In With UPort</Button> {uportMessage}</div>
           <div>
             <HoleMap recordHole={hole => this.recordHole(hole)} existingHoles={holes} centerLocation={mapCenter}/>
           </div>

@@ -17,7 +17,7 @@ An interesting near future use case for this specific area is the possibility to
 
 ## How The App Works
 
-INTERFACE:
+#### Interface:
 
 Holes can be recorded by clicking the location on the map.
 
@@ -28,17 +28,17 @@ Recorded holes are displayed on the map and also in the hole list table. Holes i
 
 The status is also reflected in the map icon colour.
 
-ACCOUNTS:
+#### Accounts:
 
 A 'User' needs an account to record holes or to evaluate repaired holes. In this case we default to account 0.
 
-In this demo there is only one 'Company', it is account 1. In the future this could be claimed by a verification process.
+In this demo there is only one 'Company', it is account 1. In the future this could be claimed by a verification process such as UPort (see below).
 
-COLONY:
+#### Colony:
 
 On the first use a Pot Hole Hunters Colony is created with its own PHH token.
 
-RECORD HOLE:
+#### Record Hole:
 
 User records a pothole location by clicking it's position on the map. Additional comment can be added. Then Record is clicked.
 
@@ -50,7 +50,7 @@ Once the Task is created the Worker role is automatically assigned as the Compan
 
 Task Manager & Worker payout is set to 1PHH. In this app I was trying to focus only on reputation but I didn't manage to figure out that part in time.
 
-UPDATE HOLE:
+#### Update Hole:
 
 A hole needs updated when the status is changed.
 
@@ -62,7 +62,7 @@ If the hole is marked as repaired the task deliverable is submitted with the new
 
 If the hold is marked as confirmed WORKER rating is submitted. The task is finalised.
 
-GETTING HOLE INFO:
+#### Getting Hole Info:
 
 To display recorded task information on the GUI the information is retreived from Colony/IPFS.
 
@@ -72,13 +72,21 @@ Using the spec hash the hole information is retrieved from IPFS.
 
 The Manager role for the task is also retrieved to show who recorded the hole.
 
+#### uPort Integration:
+
+At the moment there is only very basic uPort integration. When a user clicks Sign In at the top left and authenticates with the uPort app the user name is displayed. I didn't have time to figure out how to reference the rinkeby account details to my Ganache accounts to then interact with Colony, etc.
+
+In the future using uPort seems like a nice way to authenticate users for reporting/evaluating holes and getting company/worker info and from initial work the uPort system is nice to work with.
+
 ## Running Project
 
-Clone project: ```https://github.com/johngrantuk/colonyHackathon.git```
+Clone project: ```git clone https://github.com/johngrantuk/colonyHackathon.git```
+
+```cd colonyHackathon```
 
 Then: ```npm install```
 
-Then: ```npm run```
+Then: ```npm start```
 
 Make sure the local Colony test network is running. All from the local Colony contract folder:
 
