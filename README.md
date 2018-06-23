@@ -15,7 +15,7 @@ As well as complaining about the weather people in the UK love a good moan about
 
 An interesting near future use case for this specific area is the possibility to combine the issue reporting with drone repair technology. A number of companies are working on autonomous drones that locate and repair potholes/damaged roads using mobile tarmac 3D print technology (I promise this is true :) ). Using a Colony based app drones can assume the role of workers, autonomously scanning the Colony task list for suitable repairs to make, carrying out the repairs and automatically marking the job as complete to be rated by the public. Surely that's all the hot topics - drones, 3D printing, IoT, blockchain and of course, pot holes!
 
-![Screenshot](Screen Shot.png)
+[Screenshot](Screen Shot.png)
 
 ## How The App Works
 
