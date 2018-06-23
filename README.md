@@ -15,6 +15,8 @@ As well as complaining about the weather people in the UK love a good moan about
 
 An interesting near future use case for this specific area is the possibility to combine the issue reporting with drone repair technology. A number of companies are working on autonomous drones that locate and repair potholes/damaged roads using mobile tarmac 3D print technology (I promise this is true :) ). Using a Colony based app drones can assume the role of workers, autonomously scanning the Colony task list for suitable repairs to make, carrying out the repairs and automatically marking the job as complete to be rated by the public. Surely that's all the hot topics - drones, 3D printing, IoT, blockchain and of course, pot holes!
 
+![Screenshot](Screen Shot.png)
+
 ## How The App Works
 
 #### Interface:
@@ -78,6 +80,8 @@ At the moment there is only very basic uPort integration. When a user clicks Sig
 
 In the future using uPort seems like a nice way to authenticate users for reporting/evaluating holes and getting company/worker info and from initial work the uPort system is nice to work with.
 
+![Screenshot](Techs.png)
+
 ## Running Project
 
 Clone project: ```git clone https://github.com/johngrantuk/colonyHackathon.git```
@@ -97,3 +101,13 @@ Deploy Colony contracts:
 
 Start Truggle Pig:
 ``` trufflepig --ganacheKeyFile ganache-accounts.json```
+
+## Team Members and Contact info
+
+John: @johngrantuk on github, johngrantuk@googlemail.com
+
+## Additional Materials
+
+Here's my [demo video](https://youtu.be/_V_vWxrxdo0).
+
+[Medium post](https://medium.com/@johngrant/ethereum-development-colony-hackathon-consenys-academy-react-8fc845ea47f1).
